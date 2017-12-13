@@ -1,0 +1,60 @@
+############################################
+# Jonathan Dixon  
+#writes a table of all the extended data in a folder
+
+rm(list=ls()) # clear memory
+#where your extended files are:
+FromDirectory <- "C:\\Users\\j.dixon\\Desktop\\Rainfall Updates\\Extended"
+
+#where you want it written to:
+WriteToDirectory <- "C:\\Users\\j.dixon\\Desktop\\Rainfall Updates\\Summaries"
+
+fileList <- list.files(FromDirectory)
+
+sampleFile <- fileList[1]
+
+sampleFileAddress <- file.path(FromDirectory,sampleFile,fsep = "\\")
+
+#obtain dates data from first (sample) file
+datesData <- read.csv(sampleFileAddress,header=TRUE)[1]
+
+
+
+
+#preallocate data frame:
+
+finalTable <- data.frame(matrix(NA,nrow= nrow(datesData), ncol = (length(fileList)+1)))
+
+#input dates Data
+finalTable[,1] <- datesData
+
+colnames(finalTable)[1] <- "Date"
+                         
+
+columnPosition <- 2
+
+for (file in fileList){
+
+  fileOfInterest <- file.path(FromDirectory,file,fsep = "\\")
+  
+  #obtain the Value data
+  fileValueData  <-  read.csv(fileOfInterest,header=TRUE)$Value
+  
+  finalTable[,columnPosition] <- fileValueData
+  
+  #name the column
+  colnames(finalTable)[columnPosition] <- file
+  
+  columnPosition <- columnPosition + 1
+  
+}
+
+#remove NAs
+finalTable[is.na(finalTable)] <- ""
+
+
+outFileName <- file.path(WriteToDirectory,"Values extended.csv",fsep = "\\") 
+
+#write to the CSV#  
+write.table(finalTable,outFileName,row.names=FALSE,col.names=TRUE,sep=",")
+
